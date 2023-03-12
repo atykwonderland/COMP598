@@ -97,21 +97,18 @@ def cloud_node(name, pod_name):
             pod = client.networks.get(pod_name)
             result = 'unknown'
             node_status = 'unknown'
-            counter = 0
-            for node in nodes:
-                if node.pod_name == pod_name:
-                    counter += 1
-                    # node already exists
-                    if name == node.name:
-                        node_status = node.status
-                        print('Node already exists: ' + str(name) + ' with status ' + str(node_status))
-                        result = 'node already exists'
-                        return jsonify({'result': result, 'node_status': node_status, 'node_name': str(name)})
             # check if the limit of the pod has been met
-            if (pod_name == 'light-servers'and counter >= 20) or (pod_name == 'medium-servers'and counter >= 15) or (pod_name == 'heavy-servers'and counter >= 10):
+            if node.size() >= 20:
                 print('Pod' + str(pod_name) + 'is already at its maximum resource capacity')
                 result = 'pod at maximum reasource capacity'
                 return jsonify({'result': result, 'node_status': 'not created', 'node_name': str(name)})
+            for node in nodes:
+                # node already exists
+                if name == node.name:
+                    node_status = node.status
+                    print('Node already exists: ' + str(name) + ' with status ' + str(node_status))
+                    result = 'node already exists'
+                    return jsonify({'result': result, 'node_status': node_status, 'node_name': str(name)})
             # make new node
             if result == 'unknown' and node_status == 'unknown':
                 n = client.containers.run(image = "alpine", command='/bin/sh', detach=True, tty=True, name=str(name), network=pod.name)
@@ -134,7 +131,7 @@ def cloud_node_rm(name, pod_name):
             node_to_remove = client.containers.get(name)
             for i in range(len(nodes)):
                 if name == nodes[i].name and pod_name == node[i].pod_name:
-                    # remove if status is idle
+                    # remove if status is new
                     if nodes[i].status == 'New':
                         node_to_remove.stop()
                         node_to_remove.remove() 
