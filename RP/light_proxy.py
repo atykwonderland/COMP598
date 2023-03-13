@@ -9,14 +9,7 @@ nodes = []
 jobs = []
 job_queue = []
 
-# pod is network in docker
-# not used yet since no resource clusters
-class Pod:
-    def __init__(self, name, id) -> None:
-        self.name = name
-        self.id = id
-    
-# node is container in docker
+
 class Node:
     # list of dictionaires for output log
     # {'job_id': id, 'output': output}
@@ -26,7 +19,6 @@ class Node:
         self.name = name
         self.status = "Idle"
         self.id = id
-        seld.pod_name = pod_name
 
 class Job:
     node_id = ""
@@ -87,7 +79,7 @@ def cloud_pod_rm(name):
     
 #---------------------------------- HANA --------------------------------------
 
-@app.route('/cloudproxy/nodes/<name>', defaults={'pod_name': 'default_pod'}, methods=['GET'])
+# @app.route('/cloudproxy/nodes/<name>', defaults={'pod_name': 'default_pod'}, methods=['GET'])
 @app.route('/cloudproxy/nodes/<name>/<pod_name>', methods=['GET']) 
 def cloud_node(name, pod_name):
     if request.method == 'GET':
